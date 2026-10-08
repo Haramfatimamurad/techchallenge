@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heart Disease Prediction</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b2b;
+      --muted: #5d706d;
+      --paper: #f4f6f1;
+      --surface: #ffffff;
+      --line: #d9e1da;
+      --green: #176b55;
+      --green-dark: #10513f;
+      --coral: #b84b38;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 85% 8%, #dcebe0 0, transparent 34%), var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(940px, calc(100% - 32px));
+      margin: 48px auto;
+    }
+
+    header { margin-bottom: 28px; }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 8px 0;
+      font-family: Georgia, serif;
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 500;
+    }
+
+    header p, .note { color: var(--muted); line-height: 1.6; }
+
+    form {
+      padding: 28px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 36px #1b46300d;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    label { display: grid; gap: 7px; font-size: 14px; font-weight: 600; }
+
+    label span { color: var(--muted); font-size: 12px; font-weight: 400; }
+
+    input, select {
+      width: 100%;
+      min-height: 44px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input:focus, select:focus { outline: 2px solid #8bc2aa; outline-offset: 1px; }
+
+    button {
+      margin-top: 24px;
+      min-height: 46px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 4px;
+      background: var(--green);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--green-dark); }
+
+    .result, .error {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--green);
+      background: #e7f1e9;
+      line-height: 1.5;
+    }
+
+    .error { border-color: var(--coral); background: #f8eae5; }
+
+    .note { margin: 18px 2px; font-size: 13px; }
+
+    @media (max-width: 680px) {
+      main { margin: 28px auto; }
+      form { padding: 20px; }
+      .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    }
+
+    @media (max-width: 420px) {
+      .fields { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Clinical feature estimator</div>
+      <h1>Heart disease prediction</h1>
+      <p>Enter the measurements below to generate a prediction from the trained classification model.</p>
+    </header>
+
+    <form method="post">
+      <div class="fields">
+        <label>Age <span>Years</span><input name="age" type="number" min="1" max="120" step="1" required value="{{ form_values.get('age', '') }}"></label>
+        <label>Sex <span>0 = female, 1 = male</span><select name="sex" required><option value="">Choose</option><option value="0" {% if form_values.get('sex') == '0' %}selected{% endif %}>Female (0)</option><option value="1" {% if form_values.get('sex') == '1' %}selected{% endif %}>Male (1)</option></select></label>
+        <label>Chest pain type <span>Encoded category: 0–3</span><select name="cp" required><option value="">Choose</option>{% for value in range(4) %}<option value="{{ value }}" {% if form_values.get('cp') == value|string %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+        <label>Resting blood pressure <span>mm Hg</span><input name="trestbps" type="number" min="50" max="250" step="1" required value="{{ form_values.get('trestbps', '') }}"></label>
+        <label>Cholesterol <span>mg/dl</span><input name="chol" type="number" min="0" max="700" step="1" required value="{{ form_values.get('chol', '') }}"></label>
+        <label>Fasting blood sugar <span>0 = no, 1 = yes</span><select name="fbs" required><option value="">Choose</option><option value="0" {% if form_values.get('fbs') == '0' %}selected{% endif %}>No (0)</option><option value="1" {% if form_values.get('fbs') == '1' %}selected{% endif %}>Yes (1)</option></select></label>
+        <label>Resting ECG <span>Encoded category: 0–2</span><select name="restecg" required><option value="">Choose</option>{% for value in range(3) %}<option value="{{ value }}" {% if form_values.get('restecg') == value|string %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+        <label>Maximum heart rate <span>Beats per minute</span><input name="thalach" type="number" min="40" max="250" step="1" required value="{{ form_values.get('thalach', '') }}"></label>
+        <label>Exercise-induced angina <span>0 = no, 1 = yes</span><select name="exang" required><option value="">Choose</option><option value="0" {% if form_values.get('exang') == '0' %}selected{% endif %}>No (0)</option><option value="1" {% if form_values.get('exang') == '1' %}selected{% endif %}>Yes (1)</option></select></label>
+        <label>Oldpeak <span>ST depression</span><input name="oldpeak" type="number" min="-3" max="10" step="0.1" required value="{{ form_values.get('oldpeak', '') }}"></label>
+        <label>ST slope <span>Encoded category: 0–2</span><select name="slope" required><option value="">Choose</option>{% for value in range(3) %}<option value="{{ value }}" {% if form_values.get('slope') == value|string %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+        <label>Number of major vessels (ca) <span>Encoded category: 0–4</span><select name="ca" required><option value="">Choose</option>{% for value in range(5) %}<option value="{{ value }}" {% if form_values.get('ca') == value|string %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+        <label>Thal <span>Encoded category: 0–3</span><select name="thal" required><option value="">Choose</option>{% for value in range(4) %}<option value="{{ value }}" {% if form_values.get('thal') == value|string %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>
+      </div>
+      <button type="submit">Run prediction</button>
+      {% if prediction is not none %}
+      <div class="result" role="status"><strong>Model result:</strong> {% if prediction == 1 %}heart disease predicted{% else %}heart disease not predicted{% endif %} (class {{ prediction }}).</div>
+      {% endif %}
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+    </form>
+    <p class="note">Educational use only. This prediction is not a diagnosis and should not replace advice from a qualified healthcare professional.</p>
+  </main>
+</body>
+</html>
